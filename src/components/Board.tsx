@@ -14,6 +14,8 @@ export interface BoardProps {
   humanChainCells?: Coord[];
   /** Computer player's longest-chain cells, highlighted in debug mode. */
   computerChainCells?: Coord[];
+  /** The winning line's cells; highlighted whenever the game has been won. */
+  winningCells?: Coord[];
 }
 
 function chainKey(col: number, row: number): string {
@@ -35,6 +37,7 @@ export function Board({
   debug = false,
   humanChainCells = [],
   computerChainCells = [],
+  winningCells = [],
 }: BoardProps) {
   const highlightedChainCells = new Set<string>();
   if (debug) {
@@ -44,6 +47,13 @@ export function Board({
     for (const { col, row } of computerChainCells) {
       highlightedChainCells.add(chainKey(col, row));
     }
+  }
+
+  // The winning line is always highlighted once a game is won, independent of
+  // debug mode.
+  const winningCellKeys = new Set<string>();
+  for (const { col, row } of winningCells) {
+    winningCellKeys.add(chainKey(col, row));
   }
 
   // Render rows from the highest (ROWS - 1) down to 0 so row 0 sits at the bottom.
@@ -67,6 +77,7 @@ export function Board({
               value={board[col][row]}
               selected={col === selectedColumn}
               chainHighlight={highlightedChainCells.has(chainKey(col, row))}
+              winningCell={winningCellKeys.has(chainKey(col, row))}
             />
           ))}
         </div>
@@ -74,3 +85,4 @@ export function Board({
     </div>
   );
 }
+

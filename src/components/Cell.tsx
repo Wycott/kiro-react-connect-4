@@ -12,6 +12,8 @@ export interface CellProps {
   selected: boolean;
   /** True when this cell is part of a highlighted longest chain (debug mode). */
   chainHighlight: boolean;
+  /** True when this cell is part of the winning line (highlighted on a win). */
+  winningCell?: boolean;
   /** True to apply the optional drop-animation class to the disc. */
   animateDrop?: boolean;
 }
@@ -31,12 +33,14 @@ export function Cell({
   value,
   selected,
   chainHighlight,
+  winningCell = false,
   animateDrop = false,
 }: CellProps) {
   const cellClassNames = [
     styles.cell,
     selected ? styles.selected : '',
     chainHighlight ? styles.chain : '',
+    winningCell ? styles.winning : '',
   ]
     .filter(Boolean)
     .join(' ');
@@ -60,6 +64,7 @@ export function Cell({
       data-disc={value ?? 'empty'}
       data-selected={selected}
       data-chain={chainHighlight}
+      data-winning={winningCell}
       role="gridcell"
     >
       {value && (
@@ -72,3 +77,4 @@ export function Cell({
     </div>
   );
 }
+

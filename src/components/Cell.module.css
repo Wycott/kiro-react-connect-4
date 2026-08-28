@@ -21,6 +21,38 @@
   box-shadow: 0 0 0 3px #00e5ff inset;
 }
 
+/*
+ * Winning-line highlight, shown whenever the game has been won. A gold ring
+ * and glow that stand out from both the selected-column outline and the cyan
+ * debug chain, with a gentle pulse to draw the eye to the winning four.
+ */
+.winning {
+  box-shadow:
+    0 0 0 3px #ffd21a inset,
+    0 0 12px 2px rgba(255, 210, 26, 0.75);
+  animation: winPulse 1s ease-in-out infinite;
+}
+
+@keyframes winPulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 3px #ffd21a inset,
+      0 0 12px 2px rgba(255, 210, 26, 0.75);
+  }
+  50% {
+    box-shadow:
+      0 0 0 3px #ffe680 inset,
+      0 0 18px 5px rgba(255, 210, 26, 0.95);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .winning {
+    animation: none;
+  }
+}
+
 .disc {
   display: block;
   width: 78%;
@@ -62,3 +94,4 @@
     animation: none;
   }
 }
+

@@ -146,10 +146,11 @@ export function GameScreen({
 
       <Board
         board={board}
-        selectedColumn={selectedColumn}
+        selectedColumn={isPlaying ? selectedColumn : -1}
         debug={debug}
         humanChainCells={humanChain?.cells ?? []}
         computerChainCells={computerChain?.cells ?? []}
+        winningCells={status.kind === 'win' ? status.cells : []}
       />
 
       <div className={styles.controls}>
@@ -173,4 +174,6 @@ export function GameScreen({
     </main>
   );
 }
+
+
 
