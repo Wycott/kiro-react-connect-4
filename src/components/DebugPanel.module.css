@@ -1,0 +1,17 @@
+.debugPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.chains {
+  display: flex;
+  gap: 1rem;
+}

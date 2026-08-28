@@ -1,0 +1,17 @@
+.board {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background-color: #12276b; /* darker board frame */
+  border-radius: 12px;
+  /* Responsive for desktop viewport widths (Requirement 10.2). */
+  width: min(70vw, 560px);
+  box-sizing: border-box;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
