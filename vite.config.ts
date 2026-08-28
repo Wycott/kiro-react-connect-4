@@ -3,6 +3,9 @@ import react from '@vitejs/plugin-react';
 
 // CSS Modules are enabled by default in Vite for files matching `*.module.css`.
 export default defineConfig({
+  // Served from a project subpath on GitHub Pages
+  // (https://wycott.github.io/kiro-react-connect-4/).
+  base: '/kiro-react-connect-4/',
   plugins: [react()],
   css: {
     modules: {
@@ -29,4 +32,5 @@ export default defineConfig({
     },
   },
 });
+
 

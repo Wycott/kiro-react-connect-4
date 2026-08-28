@@ -14,12 +14,16 @@ export interface UseSound {
 }
 
 /** Source path per effect. Actual audio assets are optional at runtime. */
+function asset(path: string): string {
+  return `${import.meta.env.BASE_URL}${path.replace(/^\//, '')}`;
+}
+
 const SOUND_SOURCES: Record<SoundName, string> = {
-  drop: '/sounds/drop.mp3',
-  win: '/sounds/win.mp3',
-  lose: '/sounds/lose.mp3',
-  draw: '/sounds/draw.mp3',
-  invalid: '/sounds/invalid.mp3',
+  drop: asset('sounds/drop.mp3'),
+  win: asset('sounds/win.mp3'),
+  lose: asset('sounds/lose.mp3'),
+  draw: asset('sounds/draw.mp3'),
+  invalid: asset('sounds/invalid.mp3'),
 };
 
 const SOUND_NAMES: SoundName[] = ['drop', 'win', 'lose', 'draw', 'invalid'];
@@ -80,4 +84,8 @@ export function useSound(options?: { invalidEnabled?: boolean }): UseSound {
 
   return { play, muted, toggleMute };
 }
+
+
+
+
 
