@@ -1,4 +1,4 @@
----
+﻿---
 name: behavioural-summary
 description: Summarises the functional behaviour of the system including what it does, how it does it, and the main workflows.
 ---
@@ -7,7 +7,7 @@ description: Summarises the functional behaviour of the system including what it
 
 ## Description
 
-Summarises the functional behaviour of the RogedoPoker system: what it does, how it does it, and what the main workflows are. Produces a readable document aimed at someone who needs to understand the system's behaviour without reading the code.
+Summarises the functional behaviour of the Connect 4 game: what it does, how it does it, and what the main workflows are. Produces a readable document aimed at someone who needs to understand the system's behaviour without reading the code.
 
 ## Trigger
 
@@ -19,21 +19,22 @@ Analyse the solution's source code to understand and document its functional beh
 
 ### Procedure
 
-1. Read entry points (Program.cs, controllers, form constructors) to identify how users interact with the system.
-2. Read domain logic to understand the core algorithms and processing steps.
-3. Trace the main workflows end-to-end (from user action to result).
-4. Identify inputs, outputs, and side effects for each workflow.
-5. Document any background processes, event-driven behaviour, or scheduled tasks.
-6. Write `behavioural-summary.md` using the Output Format below.
+1. Read entry points (`src/main.tsx`, `src/components/App.tsx`) to identify how users interact with the system and how screens are selected.
+2. Read the pure game logic (`src/logic/gameLogic.ts`, `src/logic/ai.ts`, `src/logic/types.ts`) to understand the core algorithms (drop mechanics, win/draw detection, the Computer heuristic).
+3. Read the state layer (`src/hooks/useGameReducer.ts`) and the input/output hooks (`src/hooks/useKeyboard.ts`, `src/hooks/useSound.ts`) to understand how actions flow through the app.
+4. Trace the main workflows end-to-end (from a keypress or button click to a board update and rendered result).
+5. Identify inputs, outputs, and side effects for each workflow (state changes, sound playback, win-counter updates).
+6. Document any timed or effect-driven behaviour, such as the delayed Computer move scheduled via `setTimeout`.
+7. Write `behavioural-summary.md` using the Output Format below.
 
 ### Output Format
 
 ```markdown
-# Behavioural Summary — RogedoPoker
+# Behavioural Summary — Connect 4
 
 ## What the System Does
 
-<2-3 paragraph plain-English description of the system's purpose and capabilities.>
+<2-3 paragraph plain-English description of the game's purpose and capabilities.>
 
 ## How It Works
 
@@ -51,7 +52,7 @@ Analyse the solution's source code to understand and document its functional beh
 
 **Inputs:** <What data is needed>
 **Outputs:** <What is produced>
-**Side Effects:** <Any state changes, messages sent, data persisted>
+**Side Effects:** <Any state changes, sounds played, counters updated>
 
 ---
 
@@ -63,31 +64,33 @@ Analyse the solution's source code to understand and document its functional beh
 
 ```mermaid
 flowchart LR
-    A[User Input] --> B[Processing]
-    B --> C[Output]
+    A[Keyboard / Button] --> B[Reducer Action]
+    B --> C[Pure Game Logic]
+    C --> D[New Game State]
+    D --> E[Rendered Board]
 ```
 
 ## External Interactions
 
 | System | Direction | Purpose |
 |--------|-----------|---------|
-| Redis | Read/Write | Cache analysis results |
+| HTMLAudioElement (`/sounds/*.mp3`) | Write (playback) | Play drop/win/lose/draw/invalid sound effects |
 
 ## Key Behaviours & Rules
 
-<List of important business rules, constraints, or behavioural invariants the system enforces.>
+<List of important game rules, constraints, or behavioural invariants the system enforces — e.g. discs fall to the lowest empty row, drops into full columns are rejected, an ended game rejects further drops.>
 
 ## Edge Cases & Error Handling
 
-<How the system handles invalid input, failures, and boundary conditions.>
+<How the system handles invalid input, full columns, ended games, and boundary conditions.>
 ```
 
 ### Rules
 
 - Read actual source files to understand behaviour — do not guess.
-- Describe behaviour from the user's perspective first, then explain internals.
+- Describe behaviour from the player's perspective first, then explain internals.
 - Use plain English — this document should be understandable by non-developers.
-- Trace at least the primary workflow end-to-end with specific steps.
+- Trace at least the primary workflow (a Human drop followed by the Computer's response) end-to-end with specific steps.
 - Include Mermaid flowcharts for complex workflows.
-- Note any behaviour that is implicit or relies on convention rather than explicit code.
+- Note any behaviour that is implicit or relies on convention rather than explicit code (e.g. the `board[col][row]` layout with row 0 as the lowest row).
 - Write the report to `behavioural-summary.md` in the repository root, overwriting any existing content.

@@ -1,4 +1,4 @@
----
+﻿---
 name: dependency-map
 description: Creates a dependency map of the solution highlighting tight coupling, implicit contracts, and architectural drift.
 ---
@@ -7,7 +7,7 @@ description: Creates a dependency map of the solution highlighting tight couplin
 
 ## Description
 
-Creates a dependency map of the RogedoPoker solution covering projects, namespaces, and major classes. Highlights tight coupling, implicit contracts, and any architectural drift.
+Creates a dependency map of the Connect 4 solution covering layers, modules, and major functions/components. Highlights tight coupling, implicit contracts, and any architectural drift.
 
 ## Trigger
 
@@ -15,76 +15,77 @@ When the user asks for "dependency map", "dependencies", "coupling analysis", or
 
 ## Instructions
 
-Analyse the solution's dependency structure at three levels: project, namespace, and class. Identify problematic coupling patterns and write the results to `dependency-map.md`.
+Analyse the solution's dependency structure at three levels: layer (logic / hooks / components), module (individual `.ts`/`.tsx` files), and export (functions, components, hooks). Identify problematic coupling patterns and write the results to `dependency-map.md`.
 
 ### Procedure
 
-1. Read the solution file(s) to identify all projects.
-2. Read each project's `.csproj` to map project-to-project references.
+1. Read `package.json` to identify runtime and dev dependencies and the available scripts.
+2. Read the source tree under `src/` to identify the layers: pure logic (`src/logic`), React hooks (`src/hooks`), and components (`src/components`).
 3. Read source files to identify:
-   - Namespaces used within each project
-   - `using` statements to determine cross-namespace dependencies
-   - Major classes and their direct dependencies (constructor parameters, field types, method parameters)
+   - `import` statements to determine cross-module and cross-layer dependencies
+   - Major exports (functions, hooks, components) and their direct dependencies (parameters, imported symbols)
+   - Which modules are leaves (e.g. `src/logic/types.ts`) versus hubs
 4. Identify tight coupling:
-   - Classes that depend on concrete implementations rather than interfaces
-   - Projects with circular or excessive cross-references
-   - Classes with high fan-out (depending on many other classes)
+   - Components that reach directly into logic instead of going through hooks/state
+   - Modules with high fan-out (importing from many other modules)
+   - Test-only helpers (`src/logic/testGenerators.ts`) leaking into production paths
 5. Identify implicit contracts:
-   - Static classes/methods used across boundaries
-   - Shared mutable state
-   - Convention-based coupling (e.g. string-based lookups, reflection)
+   - Shared conventions such as the `board[col][row]` layout with row 0 lowest
+   - Sentinel values (`landedRow: -1`, `selectedColumn: -1` meaning "none", `chooseComputerColumn` returning `-1`)
+   - String-keyed lookups (sound names, disc colours `'R'`/`'Y'`)
 6. Identify architectural drift:
-   - Projects that violate their apparent layer (e.g. domain depending on infrastructure)
-   - Inconsistent dependency direction
-   - Test projects referencing internals they shouldn't need
+   - Logic importing from hooks or components (should be dependency-free)
+   - Hooks importing from components
+   - Inconsistent dependency direction across layers
 7. Write `dependency-map.md` using the Output Format below.
 
 ### Output Format
 
 ```markdown
-# Dependency Map — RogedoPoker
+# Dependency Map — Connect 4
 
 ## Overview
 
-<Summary of the dependency landscape: how many projects, overall coupling health, key findings.>
+<Summary of the dependency landscape: how many modules per layer, overall coupling health, key findings.>
 
-## Project Dependencies
+## Layer Dependencies
 
 ```mermaid
 graph TD
-    A[Project A] --> B[Project B]
-    A --> C[Project C]
+    C[components] --> H[hooks]
+    C --> L[logic]
+    H --> L
 ```
 
-## Namespace Map
+## Module Map
 
-| Project | Namespaces | Depends On |
-|---------|-----------|------------|
-| AnalysisEngine.Domain | AnalysisEngine.Domain.Domain, .Objects, .Factory | (none — leaf) |
+| Layer | Modules | Depends On |
+|-------|---------|------------|
+| logic | types.ts, gameLogic.ts, ai.ts | types.ts (leaf) |
 
-## Key Classes & Their Dependencies
+## Key Exports & Their Dependencies
 
-| Class | Project | Depends On | Fan-Out |
-|-------|---------|-----------|---------|
-| Factory | AnalysisEngine.Domain | Deck, Deal, HoleCards, Card | 4 |
+| Export | Module | Depends On | Fan-Out |
+|--------|--------|-----------|---------|
+| chooseComputerColumn | logic/ai.ts | openColumns, dropDisc, checkWinAt, CENTER_COL | 4 |
 
 ## Tight Coupling
 
 | # | Location | Issue | Severity |
 |---|----------|-------|----------|
-| 1 | `ClassName` in `ProjectName` | Depends on concrete `OtherClass` instead of interface | Medium |
+| 1 | `Component` in `components/` | Calls logic directly instead of via a hook | Medium |
 
 ## Implicit Contracts
 
 | # | Location | Contract Type | Description |
 |---|----------|--------------|-------------|
-| 1 | `Shuffle.ServeNext` | Static shared state | Global random counter used across Card instances |
+| 1 | `board[col][row]` | Layout convention | Row 0 is the lowest row; relied on across logic and rendering |
 
 ## Architectural Drift
 
 | # | Finding | Expected | Actual | Impact |
 |---|---------|----------|--------|--------|
-| 1 | Domain references infrastructure | Domain should be dependency-free | Depends on X | High |
+| 1 | logic imports a hook | logic should be dependency-free | Depends on X | High |
 
 ## Summary & Recommendations
 
@@ -93,9 +94,9 @@ graph TD
 
 ### Rules
 
-- Read actual project files and source code — do not guess at dependencies.
-- Include all projects (source, test, tools).
-- For the class-level analysis, focus on public/internal classes with 3+ dependencies (fan-out ≥ 3).
+- Read actual source files and `package.json` — do not guess at dependencies.
+- Include all modules across `src/logic`, `src/hooks`, and `src/components` (plus test files where relevant).
+- For the export-level analysis, focus on functions/hooks/components with 3+ dependencies (fan-out >= 3).
 - Severity levels: High (runtime risk or blocks refactoring), Medium (maintainability concern), Low (style or minor improvement).
-- Architectural drift is relative to the apparent layering — infer the intended layers from project names and structure.
+- Architectural drift is relative to the intended layering: components -> hooks -> logic, with `logic` as a pure, dependency-free core.
 - Write the report to `dependency-map.md` in the repository root, overwriting any existing content.

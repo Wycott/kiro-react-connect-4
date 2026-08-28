@@ -1,4 +1,4 @@
----
+﻿---
 name: dev-quick-start
 description: Writes a quick-start onboarding guide for a developer returning to this codebase after years away.
 ---
@@ -7,7 +7,7 @@ description: Writes a quick-start onboarding guide for a developer returning to 
 
 ## Description
 
-Writes a quick-start onboarding guide for a developer returning to the RogedoPoker codebase after time away. Covers how to build, how to run, key entry points, debugging tips, and common pitfalls.
+Writes a quick-start onboarding guide for a developer returning to the Connect 4 codebase after time away. Covers how to build, how to run, key entry points, debugging tips, and common pitfalls.
 
 ## Trigger
 
@@ -19,81 +19,90 @@ Analyse the solution to produce a practical developer onboarding guide.
 
 ### Procedure
 
-1. Read solution file(s) to identify all projects and their roles.
-2. Read `.csproj` files to determine:
-   - Target framework and SDK version
-   - Required tooling (e.g. .NET SDK version)
-   - External service dependencies (Redis, RabbitMQ, databases)
-3. Read entry points (`Program.cs`, form constructors, `Startup.cs`) to identify how to launch each runnable project.
-4. Read `launchSettings.json` or equivalent for ports, URLs, environment variables.
-5. Identify build commands, test commands, and any scripts (`.bat`, `.sh`).
-6. Read key source files to identify the main code paths a developer would need to understand first.
-7. Note any configuration, secrets, or environment setup required.
-8. Write `dev-quick-start.md` using the Output Format below.
+1. Read `package.json` to identify:
+   - Runtime dependencies (React, React DOM) and their versions
+   - Dev tooling (Vite, TypeScript, Vitest, fast-check, Testing Library, coverage provider)
+   - The available npm scripts (`dev`, `build`, `preview`, `test`, `test:watch`, `coverage`)
+2. Read the config files (`vite.config.ts`, `tsconfig*.json`) to determine build/test setup, the jsdom test environment, CSS Modules handling, and coverage configuration.
+3. Read entry points (`index.html`, `src/main.tsx`, `src/components/App.tsx`) to identify how the app boots and how screens (Home / Game) are selected.
+4. Identify the dev server, build, and test commands, and any static assets required (e.g. `public/sounds/*.mp3`).
+5. Read key source files to identify the main code paths a developer would need to understand first (pure logic in `src/logic`, state in `src/hooks/useGameReducer.ts`, composition in `src/components/GameScreen.tsx`).
+6. Note any configuration or environment setup required (Node version, asset files, browser autoplay considerations for sound).
+7. Write `dev-quick-start.md` using the Output Format below.
 
 ### Output Format
 
 ```markdown
-# Dev Quick-Start — RogedoPoker
+# Dev Quick-Start — Connect 4
 
 ## Prerequisites
 
 | Requirement | Version | Notes |
 |-------------|---------|-------|
-| .NET SDK | 10.0 | Required for all projects |
+| Node.js | 18+ | Required to run Vite 6 and the tooling |
+| npm | 9+ | Package manager |
+
+## Install
+
+<Command to install dependencies.>
 
 ## Build
 
-<Commands to restore, build, and verify the solution compiles cleanly.>
+<Commands to type-check and build the production bundle, and how to verify it compiles cleanly.>
 
 ## Run
 
-### <Project Name>
+### Dev Server
 
-<How to run this project, any required configuration, URLs/ports it listens on.>
+<How to start the Vite dev server, the URL it serves on, and how to preview a production build.>
 
 ## Test
 
-<How to run the test suite, expected output, any known slow tests.>
+<How to run the test suite (unit + property + RTL), the coverage command, and any known slow tests (e.g. the real-timer keyboard end-to-end flow).>
 
 ## Key Entry Points
 
-| Project | Entry Point | What It Does |
-|---------|------------|--------------|
-| AnalysisEngineRunner.WebUI | `Program.cs` → `Startup.cs` | ASP.NET MVC web app for running poker analysis |
+| File | Role | What It Does |
+|------|------|--------------|
+| `src/main.tsx` | Bootstrap | Mounts `<App />` into the DOM |
+| `src/components/App.tsx` | Screen manager | Owns screen, chosen colour, and session win counters |
 
 ## Architecture at a Glance
 
-<Brief description of how the projects relate — which is the domain, which is the UI, which is the wrapper.>
+<Brief description of the layers — pure logic (`src/logic`), state and I/O hooks (`src/hooks`), and presentational/composition components (`src/components`).>
 
 ## Debugging Tips
 
-<Practical tips for debugging: breakpoint locations, how to isolate issues, useful watch expressions.>
+<Practical tips: enabling the in-game Debug panel (longest-chain highlight), inspecting reducer actions, and where the Computer move is scheduled.>
 
 ## Common Pitfalls
 
 | Pitfall | Symptom | Fix |
 |---------|---------|-----|
-| Redis not running | DataCaching throws connection timeout | Start Redis via Docker: `docker run -d -p 6379:6379 redis` |
+| Missing sound assets | No sound; `play()` promise rejects silently | Ensure `public/sounds/*.mp3` exist and match the paths in `useSound.ts` |
+| Browser autoplay policy | First sound does not play | A user gesture (keypress/click) is required before audio plays |
 
-## Configuration & Secrets
+## Configuration & Assets
 
-<Any appsettings, environment variables, or connection strings needed. Do NOT include actual secret values.>
+<Any config or static assets needed: CSS Modules, the `public/sounds` folder, coverage output in `./coverage`. Do NOT include any secret values.>
 
 ## Useful Commands
 
 | Command | Purpose |
 |---------|---------|
-| `dotnet build PokerToolsBuild.sln` | Build all projects |
-| `dotnet test PokerToolsBuild.sln` | Run all unit tests |
+| `npm install` | Install dependencies |
+| `npm run dev` | Start the Vite dev server |
+| `npm run build` | Type-check and build the production bundle |
+| `npm test` | Run the full test suite once (non-watch) |
+| `npm run coverage` | Run tests with a v8 coverage report |
 ```
 
 ### Rules
 
-- Read actual project files and source code — do not guess at configuration or commands.
+- Read actual config and source files — do not guess at commands or setup.
 - Verify build and test commands work before recommending them.
 - Be specific about versions, ports, and paths.
-- Note any platform requirements (Windows-only for WinForms projects, etc.).
-- Flag any external services that need to be running for the solution to work fully.
+- Note platform-agnostic behaviour: this is a browser app built with Vite; there are no server-side services to run.
+- Flag any static assets (sound files) that must be present for full functionality.
 - Keep the tone practical and direct — this is for a developer who needs to get productive fast.
 - Write the report to `dev-quick-start.md` in the repository root, overwriting any existing content.
